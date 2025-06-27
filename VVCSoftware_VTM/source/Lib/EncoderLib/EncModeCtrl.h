@@ -58,6 +58,8 @@ enum EncTestModeType
   ETM_HASH_INTER,
   ETM_MERGE_SKIP,
   ETM_INTER_ME,
+  ETM_AFFINE,
+  ETM_MERGE_GEO,
   ETM_INTRA,
   ETM_PALETTE,
   ETM_SPLIT_QT,
@@ -286,7 +288,7 @@ protected:
 #endif
   std::map<int, int*>  *m_bimQPMap;
   bool                  m_fastDeltaQP;
-  static_vector<ComprCUCtx, ( MAX_CU_DEPTH << 2 )> m_ComprCUCtxList;
+  //static_vector<ComprCUCtx, ( MAX_CU_DEPTH << 2 )> m_ComprCUCtxList;
   InterSearch*          m_pcInterSearch;
 
   bool                  m_doPlt;
@@ -297,6 +299,8 @@ protected:
   int                   m_HashMEPOC2;
 
 public:
+
+  static_vector<ComprCUCtx, ( MAX_CU_DEPTH << 2 )> m_ComprCUCtxList;
 
   virtual ~EncModeCtrl              () {}
 

@@ -35,6 +35,8 @@
     \brief    Coding Unit (CU) encoder class
 */
 
+#include "../CommonLib/storchmain.h"
+
 #include "EncCu.h"
 
 #include "EncLib.h"
@@ -476,6 +478,117 @@ bool EncCu::xCheckBestMode( CodingStructure *&tempCS, CodingStructure *&bestCS, 
   return bestCSUpdated;
 }
 
+void translateEncTestModeType(EncTestModeType t){
+  
+  switch(t){
+    case(ETM_HASH_INTER):
+      printf("ETM_HASH_INTER,");
+      break;
+    case(ETM_MERGE_SKIP):
+      printf("ETM_MERGE_SKIP,");
+      break;
+    case(ETM_INTER_ME):
+      printf("ETM_INTER_ME,");
+      break;
+    case(ETM_AFFINE):
+      printf("ETM_AFFINE,");
+      break;
+    case(ETM_MERGE_GEO):
+      printf("ETM_MERGE_GEO,");
+      break;
+    case(ETM_INTRA):
+      printf("ETM_INTRA,");
+      break;
+    case(ETM_PALETTE):
+      printf("ETM_PALETTE,");
+      break;
+    case(ETM_SPLIT_QT):
+      printf("ETM_SPLIT_QT,");
+      break;
+    case(ETM_SPLIT_BT_H):
+      printf("ETM_SPLIT_BT_H,");
+      break;
+    case(ETM_SPLIT_BT_V):
+      printf("ETM_SPLIT_BT_V,");
+      break;
+    case(ETM_SPLIT_TT_H):
+      printf("ETM_SPLIT_TT_H,");
+      break;
+    case(ETM_SPLIT_TT_V):
+      printf("ETM_SPLIT_TT_V,");
+      break;      
+    
+    case(ETM_POST_DONT_SPLIT):
+      printf("ETM_POST_DONT_SPLIT,");
+      break; 
+    #if REUSE_CU_RESULTS
+    case(ETM_RECO_CACHED):
+      printf("ETM_RECO_CACHED,");
+      break; 
+    #endif
+    case(ETM_TRIGGER_IMV_LIST):
+      printf("ETM_TRIGGER_IMV_LIST,");
+      break; 
+    case(ETM_IBC):
+      printf("ETM_IBC,");
+      break;  
+    case(ETM_IBC_MERGE):
+      printf("ETM_IBC_MERGE,");
+      break;   
+    case(ETM_INVALID):
+      printf("ETM_INVALID,");
+      break;         
+  }
+  
+  return;
+}
+
+// TODO: Move this to class storchmain
+// Used for debugging purposes. Print the name of input partition mode
+void translatePartSplit(PartLevel p){
+  switch(p.split){
+    case(CTU_LEVEL):
+      printf("R,");
+      break;
+    case(CU_QUAD_SPLIT):
+      printf("QT,");
+      break;
+    case(CU_HORZ_SPLIT):
+      printf("BH,");
+      break;
+    case(CU_VERT_SPLIT):
+      printf("BV,");
+      break;
+    case(CU_TRIH_SPLIT):
+      printf("TH,");
+      break;
+    case(CU_TRIV_SPLIT):
+      printf("TV,");
+      break;
+    default:
+      printf("%d,",p.split);
+      break;
+
+  }
+    
+}
+
+// TODO: Move this to class storchmain
+bool isChildrenAffineCompatible_BAK(CodingStructure*& cs, EncTestModeType type){
+  if(
+         (cs->area.lwidth()<CUSTOM_SIZE || cs->area.lheight()<CUSTOM_SIZE)        // Current block has at least one dimension smaller than 16 and is not supported by affine
+      || (cs->area.lwidth()==CUSTOM_SIZE    && cs->area.lheight()==CUSTOM_SIZE)     // Current block is the smallest size supported by affine, smaller blocks are unsupported
+      || (cs->area.lwidth()<=CUSTOM_SIZE    && ((type==ETM_SPLIT_QT) || (type==ETM_SPLIT_BT_V) || (type==ETM_SPLIT_TT_V) ) ) // Smallest width and any vertical partitioning produces unsupported
+      || (cs->area.lheight()<=CUSTOM_SIZE   && ((type==ETM_SPLIT_QT) || (type==ETM_SPLIT_BT_H) || (type==ETM_SPLIT_TT_H) ) ) // Smallest height and any vertical partitioning produces unsupported
+      || (cs->area.lwidth()<=2*CUSTOM_SIZE  && (type==ETM_SPLIT_TT_V) ) // Width 32 and ternary partition produces CUs with width=8
+      || (cs->area.lheight()<=2*CUSTOM_SIZE && (type==ETM_SPLIT_TT_H) ) // Height 32 and ternary partition produces CUs with height=8
+    )
+    return false;
+  else
+    return true;
+}
+
+
 void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Partitioner& partitioner, double maxCostAllowed )
 {
   CHECK(maxCostAllowed < 0, "Wrong value of maxCostAllowed!");
@@ -537,6 +650,38 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
 
   tempCS->splitRdCostBest = nullptr;
   m_modeCtrl->initCULevel( partitioner, *tempCS );
+
+
+  
+  // Print POC, XY position, dimensions
+  printf("POC=%d,%d,%d,%d,%d,", tempCS->picture->poc, tempCS->area.lx(), tempCS->area.ly(), tempCS->area.lwidth(), tempCS->area.lheight());
+
+  PartitioningStack z = partitioner.getPartStack();
+    
+  // Print the sequence of splits (QT, TH, TV, BH, BV) that led to the current CU
+  for(int i=0; i<z.size(); i++){
+    PartLevel part = z.at(i);
+    translatePartSplit(part);
+  }
+  printf("|||");
+    
+  cout << partitioner.getSplitSeries();
+            
+            
+  // Print the set of EncodingModes that will be tested in sequence
+  //*
+  cout << "|||";
+  printf(",");
+  std::vector<EncTestMode> zz = m_modeCtrl->m_ComprCUCtxList.back().testModes;
+  
+  for(int i=0; i<zz.size(); i++){
+    EncTestMode aa = zz.at(i);
+    translateEncTestModeType(aa.type);
+  }
+  //*/
+  cout << endl;    
+    
+
 #if GDR_ENABLED
   if (m_pcEncCfg->getGdrEnabled())
   {
@@ -853,6 +998,7 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
     }
     else if( isModeSplit( currTestMode ) )
     {
+      
       if (bestCS->cus.size() != 0)
       {
         splitmode = bestCS->cus[0]->splitSeries;

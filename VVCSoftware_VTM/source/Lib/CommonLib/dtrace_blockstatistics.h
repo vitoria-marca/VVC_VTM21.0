@@ -214,7 +214,6 @@ static const std::map<BlockStatistic, std::tuple<std::string, BlockStatisticType
   { BlockStatistic::ChromaQPAdj_Chroma,            std::tuple<std::string, BlockStatisticType, std::string>{"ChromaQPAdj_Chroma",                 BlockStatisticType::Integer,                "[-10, 10]"}}, // todo: actual limits?
   { BlockStatistic::QP_Chroma,                     std::tuple<std::string, BlockStatisticType, std::string>{"QP_Chroma",                          BlockStatisticType::Integer,                "[0, 51]"}},
   { BlockStatistic::SplitSeries_Chroma,            std::tuple<std::string, BlockStatisticType, std::string>{"SplitSeries_Chroma",                 BlockStatisticType::Integer,                "[0, " + std::to_string(std::numeric_limits<SplitSeries>::max()) + "]"}},
-
 };
 
 std::string GetBlockStatisticName(BlockStatistic statistic);

@@ -35,6 +35,8 @@
     \brief    Encoder controller for trying out specific modes
 */
 
+#include "../CommonLib/storchmain.h"
+
 #include "EncModeCtrl.h"
 
 #include "AQp.h"

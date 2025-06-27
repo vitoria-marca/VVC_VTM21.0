@@ -113,6 +113,19 @@
 
 #define NVM_BITS          "[%d bit] ", (sizeof(void*) == 8 ? 64 : 32) ///< used for checking 64-bit O/S
 
+typedef enum
+{
+  AFFINEMODEL_4PARAM,
+  AFFINEMODEL_6PARAM,
+  AFFINE_MODEL_NUM
+} EAffineModel;
+
+typedef enum{
+    UNIPRED = 0,
+    BIPRED = 1,
+    PRED_TYPE_NUM
+} EAffinePred;
+
 enum class AffineModel : uint8_t
 {
   _4_PARAMS,

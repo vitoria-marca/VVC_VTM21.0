@@ -82,6 +82,12 @@ static void printMacroSettings()
 
 int main(int argc, char* argv[])
 {
+  #if STORCHMAIN_H
+    storch();
+  #endif
+
+  printf("poc,x,y,w,h,");
+
   // print information
   fprintf( stdout, "\n" );
   fprintf( stdout, "VVCSoftware: VTM Encoder Version %s ", VTM_VERSION );
