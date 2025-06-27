@@ -890,6 +890,7 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
     }
 #endif
 
+//Testa predição inter
     if( currTestMode.type == ETM_INTER_ME )
     {
       if( ( currTestMode.opts & ETO_IMV ) != 0 )
@@ -929,6 +930,7 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
       tempCS->splitRdCostBest = splitRdCostBest;
     }
 #endif
+//Testa modo merge skip
     else if( currTestMode.type == ETM_MERGE_SKIP )
     {
       xCheckRDCostUnifiedMerge(tempCS, bestCS, partitioner, currTestMode);
@@ -990,6 +992,7 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
       splitRdCostBest[CTU_LEVEL] = bestCS->cost;
       tempCS->splitRdCostBest = splitRdCostBest;
     }
+    //Testa os particionamentos de bloco
     else if (currTestMode.type == ETM_IBC_MERGE)
     {
       xCheckRDCostIBCModeMerge2Nx2N(tempCS, bestCS, partitioner, currTestMode);
@@ -1041,8 +1044,17 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
           }
         }
 
+
+
+//Função recursiva que chama xCompressCU
         xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
         tempCS->splitRdCostBest = splitRdCostBest;
+
+
+
+
+
+
         //recover cons modes
         tempCS->modeType = partitioner.modeType = modeTypeParent;
         tempCS->treeType = partitioner.treeType = treeTypeParent;
