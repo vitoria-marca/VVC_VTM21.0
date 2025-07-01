@@ -1056,8 +1056,19 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
           }
         }
 
+        std::vector<EncTestMode> zz = m_modeCtrl->m_ComprCUCtxList.back().testModes;
+        EncTestMode aa = zz.at(i);
+        bool verify = is_TTorBT_SplitMode(aa.type);
+
+
+        if ((tempCS->area.ly() <= 554 || tempCS->area.ly() >= 1662) && verify){
+                        
+          xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
+          tempCS->splitRdCostBest = splitRdCostBest; // não sei se essa atribuição deve estar dentro da condicional
+        }
+
         //Função recursiva que chama xCompressCU
-        xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
+        //xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
         tempCS->splitRdCostBest = splitRdCostBest;
 
         //recover cons modes
