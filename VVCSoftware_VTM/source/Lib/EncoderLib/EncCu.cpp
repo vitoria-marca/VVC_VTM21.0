@@ -1056,19 +1056,19 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
           }
         }
 
-        printf("ly=%d, verify=%d, splitMode=%d\n", tempCS->area.ly(), verify, currTestMode.type);
+        printf("ly=%d, splitMode=%d\n", tempCS->area.ly(), currTestMode.type);
 
         std::vector<EncTestMode> zz = m_modeCtrl->m_ComprCUCtxList.back().testModes;
-  
+        
         for(int i=0; i<zz.size(); i++){
           EncTestMode aa = zz.at(i);
           bool verify = is_TTorBT_SplitMode(aa.type);
-
+          translateEncTestModeType(aa.type);
           if ((tempCS->area.ly() <= 554 || tempCS->area.ly() >= 1662) && verify){
                         
             xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
           }
-
+        }
         tempCS->splitRdCostBest = splitRdCostBest;
         //Função recursiva que chama xCompressCU
         //xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
