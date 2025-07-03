@@ -323,9 +323,9 @@ void EncCu::compressCtu(CodingStructure &cs, const UnitArea &area, const unsigne
 
   // Ensure that a coding was found
   // Selected mode's RD-cost must be not MAX_DOUBLE.
-  CHECK( bestCS->cus.empty()                                   , "No possible encoding found" );
-  CHECK( bestCS->cus[0]->predMode == NUMBER_OF_PREDICTION_MODES, "No possible encoding found" );
-  CHECK( bestCS->cost             == MAX_DOUBLE                , "No possible encoding found" );
+  CHECK( bestCS->cus.empty()                                   , "No possible encoding found1" );
+  CHECK( bestCS->cus[0]->predMode == NUMBER_OF_PREDICTION_MODES, "No possible encoding found2" );
+  CHECK( bestCS->cost             == MAX_DOUBLE                , "No possible encoding found3" );
 }
 
 // ====================================================================================================================
@@ -1056,20 +1056,23 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
           }
         }
 
+        printf("ly=%d, verify=%d, splitMode=%d\n", tempCS->area.ly(), verify, currTestMode.type);
+
         std::vector<EncTestMode> zz = m_modeCtrl->m_ComprCUCtxList.back().testModes;
-        EncTestMode aa = zz.at(i);
-        bool verify = is_TTorBT_SplitMode(aa.type);
+  
+        for(int i=0; i<zz.size(); i++){
+          EncTestMode aa = zz.at(i);
+          bool verify = is_TTorBT_SplitMode(aa.type);
 
-
-        if ((tempCS->area.ly() <= 554 || tempCS->area.ly() >= 1662) && verify){
+          if ((tempCS->area.ly() <= 554 || tempCS->area.ly() >= 1662) && verify){
                         
-          xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
-          tempCS->splitRdCostBest = splitRdCostBest; // não sei se essa atribuição deve estar dentro da condicional
-        }
+            xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
+          }
 
+        tempCS->splitRdCostBest = splitRdCostBest;
         //Função recursiva que chama xCompressCU
         //xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
-        tempCS->splitRdCostBest = splitRdCostBest;
+        //tempCS->splitRdCostBest = splitRdCostBest;
 
         //recover cons modes
         tempCS->modeType = partitioner.modeType = modeTypeParent;

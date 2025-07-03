@@ -74,7 +74,9 @@ extern XuPool g_xuPool;
 // coding structure
 // ---------------------------------------------------------------------------
 
-class CodingStructure
+class 
+
+CodingStructure
 {
 public:
 
