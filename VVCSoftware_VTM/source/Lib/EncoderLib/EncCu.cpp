@@ -478,15 +478,15 @@ bool EncCu::xCheckBestMode( CodingStructure *&tempCS, CodingStructure *&bestCS, 
   return bestCSUpdated;
 }
 
-bool is_TTorBT_SplitMode (EncTestModeType t){
+int is_TTorBT_SplitMode (EncTestModeType t){
   switch (t){
     case ETM_SPLIT_BT_H:
     case ETM_SPLIT_BT_V:
     case ETM_SPLIT_TT_H:
     case ETM_SPLIT_TT_V:
-      return true;
+      return 0;
     default:
-      return false;
+      return 1;
   }
 }
 
@@ -1013,7 +1013,20 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
     }
     else if( isModeSplit( currTestMode ) )
     {
-      
+      if (currTestMode.type != ETM_SPLIT_QT && ((tempCS->area.ly() + tempCS->area.lheight()/2) <= (tempCS->picture->getPicHeightInLumaSamples() * 0.25)
+                                             || (tempCS->area.ly() + tempCS->area.lheight()/2) >= (tempCS->picture->getPicHeightInLumaSamples() * 0.75))){
+        double inf_cost[18] = {MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,
+          MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,
+          MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE};
+        tempCS->splitRdCostBest = inf_cost;
+        continue;
+      }
+ 
+      // debug
+      // printf("%d \n",tempCS->picture->getPicWidthInLumaSamples());
+      // printf("%d\n",tempCS->picture->getPicHeightInLumaSamples());
+      // printf("%d\n", tempCS->area.lwidth()); tempCS->area.lheight()
+      // printf("%d\n", tempCS->area.ly());
       if (bestCS->cus.size() != 0)
       {
         splitmode = bestCS->cus[0]->splitSeries;
@@ -1056,23 +1069,40 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
           }
         }
 
-        printf("ly=%d, splitMode=%d\n", tempCS->area.ly(), currTestMode.type);
+        //debug
+        //printf("ly=%d, splitMode=%d\n", tempCS->area.ly(), currTestMode.type);
 
-        std::vector<EncTestMode> zz = m_modeCtrl->m_ComprCUCtxList.back().testModes;
-        
-        for(int i=0; i<zz.size(); i++){
-          EncTestMode aa = zz.at(i);
-          bool verify = is_TTorBT_SplitMode(aa.type);
-          translateEncTestModeType(aa.type);
-          if ((tempCS->area.ly() <= 554 || tempCS->area.ly() >= 1662) && verify){
-                        
-            xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
-          }
-        }
-        tempCS->splitRdCostBest = splitRdCostBest;
-        //Função recursiva que chama xCompressCU
-        //xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
+        // for(int i=0; i<zz.size(); i++){
+          //EncTestMode aa = zz.at(i);
+        // bool verify = is_TTorBT_SplitMode(currTestMode.type);
+        // if ((tempCS->area.ly() <= 554 || tempCS->area.ly() >= 1662) && verify){              
+        //   xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
+        //   tempCS->splitRdCostBest = splitRdCostBest;
+        // } else {
+        //   double inf_cost[18] = {MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,
+        //     MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,
+        //     MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE};
+        //   tempCS->splitRdCostBest = inf_cost;
+        // }
+
+        // if (currTestMode.type == ETM_SPLIT_QT){
+        //   xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
+        //   tempCS->splitRdCostBest = splitRdCostBest;
+        // }
+        // else if (tempCS->area.ly() <= 554 || tempCS->area.ly() >= 1662){
+        //   double inf_cost[18] = {MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,
+        //     MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,
+        //     MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE};
+        //   tempCS->splitRdCostBest = inf_cost;
+        // } else {
+        //   xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
+        //   tempCS->splitRdCostBest = splitRdCostBest;
+        // }
+        // }
         //tempCS->splitRdCostBest = splitRdCostBest;
+        //Função recursiva que chama xCompressCU
+        xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
+        tempCS->splitRdCostBest = splitRdCostBest;
 
         //recover cons modes
         tempCS->modeType = partitioner.modeType = modeTypeParent;
