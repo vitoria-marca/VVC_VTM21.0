@@ -1013,20 +1013,18 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
     }
     else if( isModeSplit( currTestMode ) )
     {
+      // if modesplit isn't quaternary and we're in lower 25% region or upper 25% region
       if (currTestMode.type != ETM_SPLIT_QT && ((tempCS->area.ly() + tempCS->area.lheight()/2) <= (tempCS->picture->getPicHeightInLumaSamples() * 0.25)
                                              || (tempCS->area.ly() + tempCS->area.lheight()/2) >= (tempCS->picture->getPicHeightInLumaSamples() * 0.75))){
         double inf_cost[18] = {MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,
           MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,
           MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE};
+          
+        //the cost to do this is infinite so VVC will never test it
         tempCS->splitRdCostBest = inf_cost;
         continue;
       }
  
-      // debug
-      // printf("%d \n",tempCS->picture->getPicWidthInLumaSamples());
-      // printf("%d\n",tempCS->picture->getPicHeightInLumaSamples());
-      // printf("%d\n", tempCS->area.lwidth()); tempCS->area.lheight()
-      // printf("%d\n", tempCS->area.ly());
       if (bestCS->cus.size() != 0)
       {
         splitmode = bestCS->cus[0]->splitSeries;
@@ -1069,37 +1067,6 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
           }
         }
 
-        //debug
-        //printf("ly=%d, splitMode=%d\n", tempCS->area.ly(), currTestMode.type);
-
-        // for(int i=0; i<zz.size(); i++){
-          //EncTestMode aa = zz.at(i);
-        // bool verify = is_TTorBT_SplitMode(currTestMode.type);
-        // if ((tempCS->area.ly() <= 554 || tempCS->area.ly() >= 1662) && verify){              
-        //   xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
-        //   tempCS->splitRdCostBest = splitRdCostBest;
-        // } else {
-        //   double inf_cost[18] = {MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,
-        //     MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,
-        //     MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE};
-        //   tempCS->splitRdCostBest = inf_cost;
-        // }
-
-        // if (currTestMode.type == ETM_SPLIT_QT){
-        //   xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
-        //   tempCS->splitRdCostBest = splitRdCostBest;
-        // }
-        // else if (tempCS->area.ly() <= 554 || tempCS->area.ly() >= 1662){
-        //   double inf_cost[18] = {MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,
-        //     MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,
-        //     MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE};
-        //   tempCS->splitRdCostBest = inf_cost;
-        // } else {
-        //   xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
-        //   tempCS->splitRdCostBest = splitRdCostBest;
-        // }
-        // }
-        //tempCS->splitRdCostBest = splitRdCostBest;
         //Função recursiva que chama xCompressCU
         xCheckModeSplit( tempCS, bestCS, partitioner, currTestMode, modeTypeParent, skipInterPass, splitRdCostBest );
         tempCS->splitRdCostBest = splitRdCostBest;
