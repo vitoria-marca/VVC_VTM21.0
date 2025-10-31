@@ -1017,16 +1017,17 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
       if (currTestMode.type != ETM_SPLIT_QT && ((tempCS->area.ly() + tempCS->area.lheight()/2) <= (tempCS->picture->getPicHeightInLumaSamples() * 0.25)
                                              || (tempCS->area.ly() + tempCS->area.lheight()/2) >= (tempCS->picture->getPicHeightInLumaSamples() * 0.75))){
         bool is_polar_region = true;
-      }  
+        
 
-      if (is_polar_region && (tempCS->area.lheight() >= 2*(tempCS->area.lwidth()))){
-        double inf_cost[18] = {MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,
-          MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,
-          MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE};
-          
-        //the cost to do this is infinite so VVC will never test it
-        tempCS->splitRdCostBest = inf_cost;
-        continue;
+        if (is_polar_region && (tempCS->area.lheight() >= 2*(tempCS->area.lwidth()))){
+          double inf_cost[18] = {MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,
+            MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,
+            MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE};
+            
+          //the cost to do this is infinite so VVC will never test it
+          tempCS->splitRdCostBest = inf_cost;
+          continue;
+        }
       }
  
       if (bestCS->cus.size() != 0)
