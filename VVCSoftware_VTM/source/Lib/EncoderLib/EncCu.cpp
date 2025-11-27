@@ -54,6 +54,7 @@
 #include <stdio.h>
 #include <cmath>
 #include <algorithm>
+#include <array>
 
 //! \ingroup EncoderLib
 //! \{
@@ -487,6 +488,17 @@ int is_TTorBT_SplitMode (EncTestModeType t){
       return 0;
     default:
       return 1;
+  }
+}
+
+bool isVerticalMode(EncTestModeType t){
+  switch (t){
+    case ETM_SPLIT_TT_V:
+    case ETM_SPLIT_BT_V:
+      return true;
+  
+    default:
+      return false;
   }
 }
 
@@ -1013,22 +1025,32 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
     }
     else if( isModeSplit( currTestMode ) )
     {
-      // if modesplit isn't quaternary and we're in lower 25% region or upper 25% region
-      if (currTestMode.type != ETM_SPLIT_QT && ((tempCS->area.ly() + tempCS->area.lheight()/2) <= (tempCS->picture->getPicHeightInLumaSamples() * 0.25)
-                                             || (tempCS->area.ly() + tempCS->area.lheight()/2) >= (tempCS->picture->getPicHeightInLumaSamples() * 0.75))){
-        bool is_polar_region = true;
-        
+      //if it is in polar region
+      bool is_polar_region = false;
 
-        if (is_polar_region && (tempCS->area.lheight() >= 2*(tempCS->area.lwidth()))){
-          double inf_cost[18] = {MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,
-            MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,
-            MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE,MAX_DOUBLE};
+      // if modesplit isn't quaternary and we're in lower 25% region or upper 25% region
+      if ((tempCS->area.ly() + tempCS->area.lheight()/2) <= (tempCS->picture->getPicHeightInLumaSamples() * 0.25) || 
+          (tempCS->area.ly() + tempCS->area.lheight()/2) >= (tempCS->picture->getPicHeightInLumaSamples() * 0.75))
+      {
+        bool is_polar_region = true;
+      }
+
+      if (is_polar_region)
+      {
+        float ratio = tempCS->area.lwidth()/tempCS->area.lheight();
+        if (isVerticalMode(currTestMode.type) && (ratio <= 1))
+        {
+            std::array<double, 18> inf_cost;
+            inf_cost.fill(MAX_DOUBLE);
             
-          //the cost to do this is infinite so VVC will never test it
-          tempCS->splitRdCostBest = inf_cost;
-          continue;
+            //the cost to do this is infinite so VVC will never test it
+            tempCS->splitRdCostBest = inf_cost.data();
         }
       }
+        
+      //PartitioningStack part_vector = partitioner.getPartStack();
+      //int last = part_vector.size();
+      //PartLevel prev_part = part_vector.at(last);
  
       if (bestCS->cus.size() != 0)
       {
