@@ -1025,26 +1025,35 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
     }
     else if( isModeSplit( currTestMode ) )
     {
-      //if it is in polar region
+      
+      //polar region flag
       bool is_polar_region = false;
-
-      // if modesplit isn't quaternary and we're in lower 25% region or upper 25% region
+      
+      //checking if the test is being performed on the polar bands
       if ((tempCS->area.ly() + tempCS->area.lheight()/2) <= (tempCS->picture->getPicHeightInLumaSamples() * 0.25) || 
           (tempCS->area.ly() + tempCS->area.lheight()/2) >= (tempCS->picture->getPicHeightInLumaSamples() * 0.75))
       {
-        bool is_polar_region = true;
+        is_polar_region = true;
       }
 
+      //if it is in polar bands
       if (is_polar_region)
       {
+        //ratio calculation
         float ratio = tempCS->area.lwidth()/tempCS->area.lheight();
-        if (isVerticalMode(currTestMode.type) && (ratio <= 1))
+        //if the current test mode is vertical (TTV or BTV), a boolean function I created is used
+        if (isVerticalMode(currTestMode.type))
         {
+          //see IMG_1
+          if (currTestMode.type ==  ETM_SPLIT_TT_V && ratio <= 2 || currTestMode.type == ETM_SPLIT_BT_V && ratio <= 1){
+            
+            // array filled of max double
             std::array<double, 18> inf_cost;
             inf_cost.fill(MAX_DOUBLE);
-            
+                          
             //the cost to do this is infinite so VVC will never test it
             tempCS->splitRdCostBest = inf_cost.data();
+          }
         }
       }
         
