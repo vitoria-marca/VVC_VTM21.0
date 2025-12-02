@@ -1045,7 +1045,7 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
         if (isVerticalMode(currTestMode.type))
         {
           //see IMG_1
-          if (currTestMode.type ==  ETM_SPLIT_TT_V && ratio <= 2 || currTestMode.type == ETM_SPLIT_BT_V && ratio <= 1){
+          if ((currTestMode.type ==  ETM_SPLIT_TT_V && ratio <= 2) || (currTestMode.type == ETM_SPLIT_BT_V && ratio <= 1)){
             
             // array filled of max double
             std::array<double, 18> inf_cost;
